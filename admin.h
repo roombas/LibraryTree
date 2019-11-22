@@ -21,5 +21,4 @@ admin::admin(/* args */)
 admin::~admin()
 {
 }
-
 #endif
