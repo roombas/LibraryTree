@@ -5,8 +5,7 @@
 #include <vector>
 using namespace std;
 
-string file_path = "C:\\Users\\amica\\OneDrive\\Documents\\Cloud Documents\\Courses\\SBVC CS 265 - Data Structures - Chou - F19\\Project\\";
-//string file_path = "C:\\file\\path";
+string file_path = "C:\\file\\path";
 string file_name = "data.csv";
 
 int main() {
