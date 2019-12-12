@@ -123,8 +123,8 @@ public:
 		{
 			cout << "AVL tree is balanced" << endl;
 			cout << "The balance factor is: " << height(t->left) - height(t->right) << endl;
-			cout << "The height of left node is: " << height(t->left) + 1 << endl;
-			cout << "The height of right node is: " << height(t->right) + 1 << endl;
+			cout << "The height of left node is: " << height(t->left) << endl;
+			cout << "The height of right node is: " << height(t->right) << endl;
 			cout << endl;
 			return;
 		}
@@ -132,8 +132,8 @@ public:
 		{
 			cout << "AVL tree is balanced" << endl;
 			cout << "The balance factor is: " << height(t->right) - height(t->left) << endl;
-			cout << "The height of left node is: " << height(t->left) + 1 << endl;
-			cout << "The height of right node is: " << height(t->right) + 1 << endl;
+			cout << "The height of left node is: " << height(t->left) << endl;
+			cout << "The height of right node is: " << height(t->right) << endl;
 			cout << endl;
 			return;
 		}
@@ -144,16 +144,16 @@ public:
 			{
 				cout << "AVL tree is imbalanced" << endl;
 				cout << "The balance factor is: " << height(t->left) - height(t->right) << endl;
-				cout << "The height of left node is: " << height(t->left) + 1 << endl;
-				cout << "The height of right node is: " << height(t->right) + 1 << endl;
+				cout << "The height of left node is: " << height(t->left)  << endl;
+				cout << "The height of right node is: " << height(t->right) << endl;
 				cout << endl;
 			}
 			else
 			{
 				cout << "AVL tree is imbalanced" << endl;
-				cout << "The balance factor is: " << height(t->left) - height(t->right) << endl;
-				cout << "The height of left node is: " << height(t->left) + 1 << endl;
-				cout << "The height of right node is: " << height(t->right) + 1 << endl;
+				cout << "The balance factor is: " << height(t->right) - height(t->left) << endl;
+				cout << "The height of left node is: " << height(t->left)  << endl;
+				cout << "The height of right node is: " << height(t->right)  << endl;
 				cout << endl;
 			}
 		}
@@ -165,16 +165,16 @@ public:
 				{
 					cout << "AVL tree is imbalanced" << endl;
 					cout << "The balance factor is: " << height(t->right) - height(t->left) << endl;
-					cout << "The height of left node is: " << height(t->left) + 1 << endl;
-					cout << "The height of right node is: " << height(t->right) + 1 << endl;
+					cout << "The height of left node is: " << height(t->left)  << endl;
+					cout << "The height of right node is: " << height(t->right)  << endl;
 					cout << endl;
 				}
 				else
 				{
 					cout << "AVL tree is imbalanced" << endl;
-					cout << "The balance factor is: " << height(t->right) - height(t->left) << endl;
-					cout << "The height of left node is: " << height(t->left) + 1 << endl;
-					cout << "The height of right node is: " << height(t->right) + 1 << endl;
+					cout << "The balance factor is: " << height(t->left) - height(t->right) << endl;
+					cout << "The height of left node is: " << height(t->left) << endl;
+					cout << "The height of right node is: " << height(t->right)  << endl;
 					cout << endl;
 				}
 			}
