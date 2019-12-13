@@ -12,15 +12,29 @@ class Book
 {
 private:
 	string title;
-	string key;
+	string key;		//first 3 letters for title
 	string author;
+	int bookStatus;	//= 1 if checked in, = 0 if checked out
 
 public:
 	Book() {}
-	Book(string aTitle, string anAuthor)
+	Book(string t, string a)
 	{
-		title = aTitle;
-		author = anAuthor;
+		title = t;
+		author = a;
+	}
+	Book(string t, string a, int b)
+	{
+		title = t;
+		author = a;
+		bookStatus = b;
+	}
+	Book(string t, string k, string a, int b)
+	{
+		title = t;
+		key = k;
+		author = a;
+		bookStatus = b;
 	}
 	string getTitle()
 	{
@@ -34,21 +48,34 @@ public:
 	{
 		return author;
 	}
-	void setTitle(string aTitle)
+	int getBookStatus()
 	{
-		title = aTitle;
+		return bookStatus;
 	}
-	void setAuthor(string anAuthor)
+	void setTitle(string t)
+	{
+		title = t;
+	}
+	void setTitleKey(string k)
+	{
+		key = k;
+	}
+	void setAuthor(string a)
  	{
-		author = anAuthor;
+		author = a;
+	}
+	void setBookStatus(int b)
+	{
+		bookStatus = b;
 	}
 };
 
+//AVL tree class
 template <typename T>
 class LibraryTree
 {
 private:
-	static const int ALLOWED_IMBALANCE = 1;
+	static const int ALLOWED_IMBALANCE = 1; //for balancing tree
 	struct Lnode
 	{
 		T data;
@@ -280,7 +307,8 @@ void LibraryTree<T>::inOrder(Lnode* t) const
 	if (t != NULL)
 	{
 		inOrder(t->left);
-		cout << "Title: " << t->data.getTitle() << " | Author: " << t->data.getAuthor() << endl;
+		cout << "Title: " << t->data.getTitle() << "\nAuthor: " << t->data.getAuthor() 
+			<< "\nChecked In: " << t->data.getBookStatus() << "\nKey: " << t->data.getTitleKey() << "\n\n";
 		inOrder(t->right);
 	}
 }
@@ -306,13 +334,81 @@ void LibraryTree<T>::insert(Lnode *& nodePtr, Lnode *& node)
 {
 	if (nodePtr == nullptr)
 		nodePtr = node;
-	else if (node->data.getTitle() < nodePtr->data.getTitle())
+	else if (node->data.getTitleKey() < nodePtr->data.getTitleKey())
 		insert(nodePtr->left, node);
 	else
 		insert(nodePtr->right, node);
 
-	balanceCheck(nodePtr);
+	//balanceCheck(nodePtr);
 	balance(nodePtr);
+}
+
+void fillTree(LibraryTree<Book>* tree)
+{
+	ifstream myFile;
+	Book book;
+	string key;
+	string title;
+	string author;
+	int checkedIn;
+	string line;
+	string word = "";
+	int num = -1;
+	string dL = "\",\"";
+	string dL1 = "\",";
+
+	myFile.open("LibraryData2.csv");//("Titles.txt");//
+	getline(myFile, line); // Skip header line
+
+	if (!myFile.good())
+	{
+		cout << "Invalid file\n";
+	}
+	else {
+		getline(myFile, line); // Get 1st line of data
+		while (myFile.good() && !myFile.eof())
+		{
+			if (myFile.good()) {
+				size_t dLPos = line.find(dL, 0);
+				// Parse Title
+				for (size_t i = 3; i < dLPos - 2; ++i) {
+					word += line[i];
+				}
+				title = word;
+				word = "";
+				// Parse Title Key (first 3 letters)
+				for (size_t i = 3; i < 6; ++i) {
+					word += line[i];
+				}
+				key = word;
+				word = "";
+				// Parse Author
+				for (size_t i = dLPos + 5; i < line.size() - 5; ++i) {
+					word += line[i];
+				}
+				author = word;
+				word = "";
+				size_t dLPos1 = line.rfind(dL1, 0);
+				// Parse Checked in or out
+				for (size_t i = dLPos1 + 4; i < line.size(); ++i) {
+					word = line[i];
+				}
+				istringstream iss(word);
+				iss >> num;
+				checkedIn = num;
+				word = "";
+				num = -1;
+
+				book.setTitleKey(key);
+				book.setTitle(title);
+				book.setAuthor(author);
+				book.setBookStatus(checkedIn);
+				(*tree).insertNode(book);
+				getline(myFile, line); // Get next line of data
+			}
+		}
+	}
+	myFile.close();
 }
 
 #endif
