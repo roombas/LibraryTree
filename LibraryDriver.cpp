@@ -13,7 +13,7 @@ void fillTree(LibraryTree<Book>* tree)
 	string word = "";
 	string dL = "\",\"";
 
-	myFile.open("Library Data.csv");//("Titles.txt");//
+	myFile.open("LibraryData2.csv");//("Titles.txt");//
 	getline(myFile, line); // Skip header line
 
 	if (!myFile.good())
