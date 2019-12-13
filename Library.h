@@ -6,6 +6,7 @@
 #include <string>
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 using namespace std;
 
 class Book
