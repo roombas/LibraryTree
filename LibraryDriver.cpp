@@ -9,20 +9,43 @@ void fillTree(LibraryTree<Book>* tree)
 	Book book;
 	string title;
 	string author;
+	string line;
+	string word = "";
+	string dL = "\",\"";
 
-	myFile.open("Data.csv");//("Titles.txt");//
-	if (!myFile)
+	myFile.open("Library Data.csv");//("Titles.txt");//
+	getline(myFile, line); // Skip header line
+
+	if (!myFile.good())
 	{
 		cout << "Invalid file\n";
 	}
-
-	while (!myFile.eof())
-	{
-		myFile >> title >> author;
-		book.setTitle(title);
-		book.setAuthor(author);
-		(*tree).insertNode(book);
+	else {
+		getline(myFile, line); // Get 1st line of data
+		while (myFile.good() && !myFile.eof())
+		{
+			if (myFile.good()) {
+				size_t dLPos = line.find(dL, 0);
+				// Parse Title
+				for (size_t i = 3; i < dLPos - 2; ++i) {
+					word += line[i];
+				}
+				title = word;
+				word = "";
+				// Parse Author
+				for (size_t i = dLPos + 5; i < line.size() - 3; ++i) {
+					word += line[i];
+				}
+				author = word;
+				word = "";
+				book.setTitle(title);
+				book.setAuthor(author);
+				(*tree).insertNode(book);
+				getline(myFile, line); // Get next line of data
+			}
+		}
 	}
+
 	myFile.close();
 }
 
