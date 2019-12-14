@@ -94,6 +94,10 @@ public:
 	{
 		root = nullptr;
 	}
+	~LibraryTree()
+	{
+		clearAll();
+	}
 	int maxDepth()
 	{
 		return getDepth(root);
@@ -119,11 +123,91 @@ public:
 	void printTreeInOrder() const;
 	void insert(Lnode*&, Lnode*&);
 	void insertNode(T);
+
+	void remove(Lnode*);
+	void removeNode(T);
+
+	void makeEmpty(Lnode*&);
+	void clearAll();
+
 	void specificInOrder(Lnode*, string);
 	void searchSpecific(string);
 	void allInOrder(Lnode*, string);
 	void searchAll(string);
 };
+
+template <typename T>
+void LibraryTree<T>::clearAll()
+{
+	makeEmpty(root);
+}
+template <typename T>
+void LibraryTree<T>::makeEmpty(Lnode *& node)
+{
+	if (node != nullptr)
+	{
+		makeEmpty(node->left);
+		makeEmpty(node->right);
+		delete node;
+	}
+	node = nullptr;
+}
+
+//insert class object Book
+template <typename T>
+void LibraryTree<T>::insertNode(T b)
+{
+	Lnode* node = new Lnode{ b, nullptr, nullptr };
+	node->data = b;
+	node->left = nullptr;
+	node->right = nullptr;
+	insert(root, node);
+}
+template <typename T>
+void LibraryTree<T>::insert(Lnode *& nodePtr, Lnode *& node)
+{
+	if (nodePtr == nullptr)
+		nodePtr = node;
+	else if (node->data.getTitleKey() < nodePtr->data.getTitleKey())
+		insert(nodePtr->left, node);
+	else
+		insert(nodePtr->right, node);
+
+	//balanceCheck(nodePtr);
+	balance(nodePtr);
+}
+
+//template <typename T>
+//void LibraryTree<T>::removeNode(T x)
+//{
+//	remove(x, root);
+//}
+//template <typename T>
+//void LibraryTree<T>::remove(Lnode *node)
+//{
+//	Lnode *tmp;
+//
+//	if (node == nullptr)
+//		return;
+//
+//	if (x < t->element)
+//		remove(x, t->left);
+//	else if (t->element < x)
+//		remove(x, t->right);
+//	else if (t->left != nullptr && t->right != nullptr) // Two children
+//	{
+//		t->element = findMin(t->right)->element;
+//		remove(t->element, t->right);
+//	}
+//	else
+//	{
+//		AvlNode *oldNode = t;
+//		t = (t->left != nullptr) ? t->left : t->right;
+//		delete oldNode;
+//	}
+//
+//	balance(t);
+//}
 
 //search function for specific book
 template <typename T>
@@ -385,29 +469,6 @@ void LibraryTree<T>::inOrder(Lnode* t) const
 			<< "\nChecked In: " << t->data.getBookStatus() << "\nKey: " << t->data.getTitleKey() << "\n\n";
 		inOrder(t->right);
 	}
-}
-//insert class object Book
-template <typename T>
-void LibraryTree<T>::insertNode(T b)
-{
-	Lnode* node = new Lnode{ b, nullptr, nullptr };
-	node->data = b;
-	node->left = nullptr;
-	node->right = nullptr;
-	insert(root, node);
-}
-template <typename T>
-void LibraryTree<T>::insert(Lnode *& nodePtr, Lnode *& node)
-{
-	if (nodePtr == nullptr)
-		nodePtr = node;
-	else if (node->data.getTitleKey() < nodePtr->data.getTitleKey())
-		insert(nodePtr->left, node);
-	else
-		insert(nodePtr->right, node);
-
-	//balanceCheck(nodePtr);
-	balance(nodePtr);
 }
 
 void fillTree(LibraryTree<Book>* tree)
