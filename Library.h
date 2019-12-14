@@ -13,7 +13,7 @@ class Book
 {
 private:
 	string title;
-	string key;		//first 3 letters for title
+	//string key;		//first 3 letters for title
 	string author;
 	int bookStatus;	//= 1 if checked in, = 0 if checked out
 
@@ -30,21 +30,21 @@ public:
 		author = a;
 		bookStatus = b;
 	}
-	Book(string t, string k, string a, int b)
-	{
-		title = t;
-		key = k;
-		author = a;
-		bookStatus = b;
-	}
+	//Book(string t, string k, string a, int b)
+	//{
+	//	title = t;
+	//	key = k;
+	//	author = a;
+	//	bookStatus = b;
+	//}
 	string getTitle()
 	{
 		return title;
 	}
-	string getTitleKey()
-	{
-		return key;
-	}
+	//string getTitleKey()
+	//{
+	//	return key;
+	//}
 	string getAuthor()
 	{
 		return author;
@@ -57,10 +57,10 @@ public:
 	{
 		title = t;
 	}
-	void setTitleKey(string k)
-	{
-		key = k;
-	}
+	//void setTitleKey(string k)
+	//{
+	//	key = k;
+	//}
 	void setAuthor(string a)
 	{
 		author = a;
@@ -124,16 +124,15 @@ public:
 	void insert(Lnode*&, Lnode*&);
 	void insertNode(T);
 
-	void remove(Lnode*);
-	void removeNode(T);
-
 	void makeEmpty(Lnode*&);
 	void clearAll();
 
-	void specificInOrder(Lnode*, string);
-	void searchSpecific(string);
+	bool specificInOrder(Lnode*, string);
+	bool searchSpecific(string);
 	void allInOrder(Lnode*, string);
 	void searchAll(string);
+
+	void changeBookStatus(string, int);
 };
 
 template <typename T>
@@ -168,52 +167,19 @@ void LibraryTree<T>::insert(Lnode*& nodePtr, Lnode*& node)
 {
 	if (nodePtr == nullptr)
 		nodePtr = node;
-	else if (node->data.getTitleKey() < nodePtr->data.getTitleKey())
+	else if (node->data.getTitle() < nodePtr->data.getTitle())
 		insert(nodePtr->left, node);
 	else
 		insert(nodePtr->right, node);
 
-	//balanceCheck(nodePtr);
 	balance(nodePtr);
 }
 
-//template <typename T>
-//void LibraryTree<T>::removeNode(T x)
-//{
-//	remove(x, root);
-//}
-//template <typename T>
-//void LibraryTree<T>::remove(Lnode *node)
-//{
-//	Lnode *tmp;
-//
-//	if (node == nullptr)
-//		return;
-//
-//	if (x < t->element)
-//		remove(x, t->left);
-//	else if (t->element < x)
-//		remove(x, t->right);
-//	else if (t->left != nullptr && t->right != nullptr) // Two children
-//	{
-//		t->element = findMin(t->right)->element;
-//		remove(t->element, t->right);
-//	}
-//	else
-//	{
-//		AvlNode *oldNode = t;
-//		t = (t->left != nullptr) ? t->left : t->right;
-//		delete oldNode;
-//	}
-//
-//	balance(t);
-//}
-
 //search function for specific book
 template <typename T>
-void LibraryTree<T>::searchSpecific(string key)
+bool LibraryTree<T>::searchSpecific(string key)
 {
-	specificInOrder(root, key);
+	return specificInOrder(root, key);
 }
 
 //search function for all matching books
@@ -223,9 +189,55 @@ void LibraryTree<T>::searchAll(string key)
 	allInOrder(root, key);
 }
 
+template <typename T>
+void LibraryTree<T>::changeBookStatus(string key, int num)
+{
+	Lnode* node = root;
+	if (node != nullptr)
+	{
+		if (node->data.getTitle() == key)
+		{		
+			string fileName = "Book1.csv";
+			ifstream myFile(fileName); // Data file
+			ofstream upFile("Book2.csv"); // Update file
+			string line;
+			size_t pos;
+			stringstream ss;
+			ss << num;
+			string str = ss.str();
+
+			while (getline(myFile, line))
+			{
+				if ((pos = line.find(key)) != string::npos)
+				{
+					string dL1 = "\",";
+					size_t dLPos1 = line.rfind(dL1, 0);
+					line = line.replace((dLPos1 + 2), 1, str);
+
+					upFile << line;
+					myFile.close();
+					upFile.close();
+					// Remove old file
+					remove(fileName.c_str());
+					rename("Book2.csv", fileName.c_str());
+				}
+			}
+		}
+		else if (node->data.getTitle() < key)
+			specificInOrder(node->right, key);
+		else
+			specificInOrder(node->left, key);
+	}
+	else
+	{
+		cout << "Title not found\n";
+		return;
+	}
+}
+
 //traverses tree and prints out the specified result
 template <typename T>
-void LibraryTree<T>::specificInOrder(Lnode* node, string key)
+bool LibraryTree<T>::specificInOrder(Lnode* node, string key)
 {
 	if (node != nullptr)
 	{
@@ -236,7 +248,7 @@ void LibraryTree<T>::specificInOrder(Lnode* node, string key)
 			cout << "Title: " << node->data.getTitle() << "\nAuthor: "
 				<< node->data.getAuthor() << "\nChecked In: "
 				<< node->data.getBookStatus() << "\n\n";
-			return;
+			return true;
 		}
 		else if (node->data.getTitle() < key)
 			specificInOrder(node->right, key);
@@ -244,7 +256,10 @@ void LibraryTree<T>::specificInOrder(Lnode* node, string key)
 			specificInOrder(node->left, key);
 	}
 	else
+	{
 		cout << "Title not found\n";
+		return false;
+	}
 }
 
 //traverses full tree in-order to find and print all books with the specified key word
@@ -466,18 +481,17 @@ void LibraryTree<T>::inOrder(Lnode* t) const
 	{
 		inOrder(t->left);
 		cout << "Title: " << t->data.getTitle() << "\nAuthor: " << t->data.getAuthor()
-			<< "\nChecked In: " << t->data.getBookStatus() << "\nKey: " << t->data.getTitleKey() << "\n\n";
+			<< "\nChecked In: " << t->data.getBookStatus() << "\n\n";//"\nKey: " << t->data.getTitleKey() << "\n\n";
 		inOrder(t->right);
 	}
 }
 
-string fileName;
-
 void fillTree(LibraryTree<Book>* tree)
 {
+	string fileName = "Book1.csv";
 	ifstream myFile;
 	Book book;
-	string key;
+	//string key;
 	string title;
 	string author;
 	int checkedIn;
@@ -487,7 +501,7 @@ void fillTree(LibraryTree<Book>* tree)
 	string dL = "\",\"";
 	string dL1 = "\",";
 
-	myFile.open(fileName);//("Titles.txt");//
+	myFile.open(fileName);
 	getline(myFile, line); // Skip header line
 
 	if (!myFile.good())
@@ -505,7 +519,7 @@ void fillTree(LibraryTree<Book>* tree)
 					word += line[i];
 				}
 				// Parse Title Key (first 3 letters)
-				key = word.substr(0, 3);
+				//key = word.substr(0, 6);
 				title = word;
 				word = "";
 
@@ -515,6 +529,7 @@ void fillTree(LibraryTree<Book>* tree)
 				}
 				author = word;
 				word = "";
+
 				size_t dLPos1 = line.rfind(dL1, 0);
 				// Parse Checked in or out
 				for (size_t i = dLPos1 + 4; i < line.size(); ++i) {
@@ -526,7 +541,7 @@ void fillTree(LibraryTree<Book>* tree)
 				word = "";
 				num = -1;
 
-				book.setTitleKey(key);
+				//book.setTitleKey(key);
 				book.setTitle(title);
 				book.setAuthor(author);
 				book.setBookStatus(checkedIn);
@@ -539,14 +554,40 @@ void fillTree(LibraryTree<Book>* tree)
 }
 
 void fillTree(LibraryTree<Book>* tree, string file) {
-	fileName = file;
+	string fileName = file;
 	fillTree(tree);
 }
 
+//void changeBookStatus(LibraryTree<Book>* tree, string title, int check)
+//{
+//	ifstream myFile(fileName); // Data file
+//	ofstream upFile("updateData.csv"); // Update file
+//	string line;
+//	size_t pos;
+//	string dL1 = "\",";
+//	if ((*tree).searchSpecific == true)
+//	{
+//		while (getline(myFile, line))
+//		{
+//			size_t dLPos1 = line.find(title, 0);
+//			for (size_t i = dLPos1 + 4; i < line.size(); ++i) {
+//				word = line[i];
+//			}
+//			istringstream iss(word);
+//			iss >> num;
+//			checkedIn = num;
+//			word = "";
+//			num = -1;
+//		}
+//
+//	}
+//}
+
 // Add Book entry to the data file
-void insert(LibraryTree<Book>* tree, string title, string author) {
+void insertBook(LibraryTree<Book>* tree, string title, string author) {
+	string fileName = "Book1.csv";
 	ifstream myFile(fileName); // Data file
-	ofstream upFile("updateData.csv"); // Update file
+	ofstream upFile("Book2.csv"); // Update file
 	// Copy old file
 	string line;
 	while (myFile.good() && !myFile.eof()) {
@@ -561,18 +602,18 @@ void insert(LibraryTree<Book>* tree, string title, string author) {
 		}
 	}
 	// Write new line
-	upFile << "\"\"\"" + title + "\"\"\",\"\"\"" + author + "\"\"\",\"\"\"" << 1 << "\"\"\"\n";
+	upFile << "\"\"\"" + title + "\"\"\",\"\"\"" + author + "\"\"\"," << 1 << endl;
 	// Close files
 	myFile.close();
 	upFile.close();
 	// Remove old file
 	remove(fileName.c_str());
-	rename("updateData.csv", fileName.c_str());
+	rename("Book2.csv", fileName.c_str());
 	// Get New Entry Key
-	string key = title.substr(0, 3);
+	//string key = title.substr(0, 6);
 	// Update Tree
 	Book book;
-	book.setTitleKey(key);
+	//book.setTitleKey(key);
 	book.setTitle(title);
 	book.setAuthor(author);
 	book.setBookStatus(1);
@@ -580,9 +621,10 @@ void insert(LibraryTree<Book>* tree, string title, string author) {
 }
 
 // Remove Book entry from the data file
-void remove(LibraryTree<Book>* tree, string title) {
+void removeBook(LibraryTree<Book>* tree, string title) {
+	string fileName = "Book1.csv";
 	ifstream myFile(fileName); // Data file
-	ofstream upFile("updateData.csv"); // Update file
+	ofstream upFile("Book2.csv"); // Update file
 	// Copy old file
 	string line;
 	while (myFile.good() && !myFile.eof()) {
@@ -601,7 +643,7 @@ void remove(LibraryTree<Book>* tree, string title) {
 	upFile.close();
 	// Remove old file
 	remove(fileName.c_str());
-	rename("updateData.csv", fileName.c_str());
+	rename("Book2.csv", fileName.c_str());
 	// Refill Tree
 	tree->clearAll();
 	fillTree(tree);
