@@ -62,7 +62,7 @@ public:
 		key = k;
 	}
 	void setAuthor(string a)
- 	{
+	{
 		author = a;
 	}
 	void setBookStatus(int b)
@@ -87,7 +87,7 @@ private:
 		Lnode(T b, Lnode* lt, Lnode* rt, int h = 0)
 			: data{ b }, left{ lt }, right{ rt }, height{ h } {}
 	};
-	Lnode *root;
+	Lnode* root;
 
 public:
 	LibraryTree()
@@ -102,11 +102,11 @@ public:
 	{
 		return getDepth(root);
 	}
-	bool isEmpty() const 
+	bool isEmpty() const
 	{
-		return root == nullptr; 
-	}	
-	int height(Lnode *t) const
+		return root == nullptr;
+	}
+	int height(Lnode* t) const
 	{
 		return t == nullptr ? -1 : t->height;
 	}
@@ -142,7 +142,7 @@ void LibraryTree<T>::clearAll()
 	makeEmpty(root);
 }
 template <typename T>
-void LibraryTree<T>::makeEmpty(Lnode *& node)
+void LibraryTree<T>::makeEmpty(Lnode*& node)
 {
 	if (node != nullptr)
 	{
@@ -164,7 +164,7 @@ void LibraryTree<T>::insertNode(T b)
 	insert(root, node);
 }
 template <typename T>
-void LibraryTree<T>::insert(Lnode *& nodePtr, Lnode *& node)
+void LibraryTree<T>::insert(Lnode*& nodePtr, Lnode*& node)
 {
 	if (nodePtr == nullptr)
 		nodePtr = node;
@@ -281,7 +281,7 @@ int LibraryTree<T>::getWidth()
 	return largest;
 }
 template <class T>
-int LibraryTree<T>::numAtLevel(Lnode *nodePtr, int level)
+int LibraryTree<T>::numAtLevel(Lnode* nodePtr, int level)
 {
 	level--;
 	// Have we reached the desired level?
@@ -329,7 +329,7 @@ int LibraryTree<T>::getDepth(Lnode* node)
 
 //function to balance tree
 template <typename T>
-void LibraryTree<T>::balance(Lnode *& t)
+void LibraryTree<T>::balance(Lnode*& t)
 {
 	if (t == NULL)
 		return;
@@ -351,7 +351,7 @@ void LibraryTree<T>::balance(Lnode *& t)
 
 //produces balance factor and height of each subtree
 template <typename T>
-void LibraryTree<T>::balanceCheck(Lnode *& t)
+void LibraryTree<T>::balanceCheck(Lnode*& t)
 {
 	if (t == nullptr)
 	{
@@ -419,9 +419,9 @@ void LibraryTree<T>::balanceCheck(Lnode *& t)
 	}
 }
 template <typename T>
-void LibraryTree<T>::rotateWithLeftChild(Lnode *& k2)
+void LibraryTree<T>::rotateWithLeftChild(Lnode*& k2)
 {
-	Lnode *k1 = k2->left;
+	Lnode* k1 = k2->left;
 	k2->left = k1->right;
 	k1->right = k2;
 	k2->height = max(height(k2->left), height(k2->right)) + 1;
@@ -429,9 +429,9 @@ void LibraryTree<T>::rotateWithLeftChild(Lnode *& k2)
 	k2 = k1;
 }
 template <typename T>
-void LibraryTree<T>::rotateWithRightChild(Lnode *& k1)
+void LibraryTree<T>::rotateWithRightChild(Lnode*& k1)
 {
-	Lnode *k2 = k1->right;
+	Lnode* k2 = k1->right;
 	k1->right = k2->left;
 	k2->left = k1;
 	k1->height = max(height(k1->left), height(k1->right)) + 1;
@@ -439,13 +439,13 @@ void LibraryTree<T>::rotateWithRightChild(Lnode *& k1)
 	k1 = k2;
 }
 template <typename T>
-void LibraryTree<T>::doubleWithLeftChild(Lnode *& k3)
+void LibraryTree<T>::doubleWithLeftChild(Lnode*& k3)
 {
 	rotateWithRightChild(k3->left);
 	rotateWithLeftChild(k3);
 }
 template <typename T>
-void LibraryTree<T>::doubleWithRightChild(Lnode *& k1)
+void LibraryTree<T>::doubleWithRightChild(Lnode*& k1)
 {
 	rotateWithLeftChild(k1->right);
 	rotateWithRightChild(k1);
@@ -465,11 +465,13 @@ void LibraryTree<T>::inOrder(Lnode* t) const
 	if (t != NULL)
 	{
 		inOrder(t->left);
-		cout << "Title: " << t->data.getTitle() << "\nAuthor: " << t->data.getAuthor() 
+		cout << "Title: " << t->data.getTitle() << "\nAuthor: " << t->data.getAuthor()
 			<< "\nChecked In: " << t->data.getBookStatus() << "\nKey: " << t->data.getTitleKey() << "\n\n";
 		inOrder(t->right);
 	}
 }
+
+string fileName;
 
 void fillTree(LibraryTree<Book>* tree)
 {
@@ -485,7 +487,7 @@ void fillTree(LibraryTree<Book>* tree)
 	string dL = "\",\"";
 	string dL1 = "\",";
 
-	myFile.open("LibraryData2.csv");//("Titles.txt");//
+	myFile.open(fileName);//("Titles.txt");//
 	getline(myFile, line); // Skip header line
 
 	if (!myFile.good())
@@ -503,7 +505,7 @@ void fillTree(LibraryTree<Book>* tree)
 					word += line[i];
 				}
 				// Parse Title Key (first 3 letters)
-				key = word.substr(0,3);
+				key = word.substr(0, 3);
 				title = word;
 				word = "";
 
@@ -534,6 +536,75 @@ void fillTree(LibraryTree<Book>* tree)
 		}
 	}
 	myFile.close();
+}
+
+void fillTree(LibraryTree<Book>* tree, string file) {
+	fileName = file;
+	fillTree(tree);
+}
+
+// Add Book entry to the data file
+void insert(LibraryTree<Book>* tree, string title, string author) {
+	ifstream myFile(fileName); // Data file
+	ofstream upFile("updateData.csv"); // Update file
+	// Copy old file
+	string line;
+	while (myFile.good() && !myFile.eof()) {
+		// Write the current line to the new file
+		if (myFile.good()) {
+			getline(myFile, line);
+			upFile << line;
+		}
+		// Add a line break to all but the last line
+		if (myFile.good()) {
+			upFile << "\n";
+		}
+	}
+	// Write new line
+	upFile << "\"\"\"" + title + "\"\"\",\"\"\"" + author + "\"\"\",\"\"\"" << 1 << "\"\"\"\n";
+	// Close files
+	myFile.close();
+	upFile.close();
+	// Remove old file
+	remove(fileName.c_str());
+	rename("updateData.csv", fileName.c_str());
+	// Get New Entry Key
+	string key = title.substr(0, 3);
+	// Update Tree
+	Book book;
+	book.setTitleKey(key);
+	book.setTitle(title);
+	book.setAuthor(author);
+	book.setBookStatus(1);
+	(*tree).insertNode(book);
+}
+
+// Remove Book entry from the data file
+void remove(LibraryTree<Book>* tree, string title) {
+	ifstream myFile(fileName); // Data file
+	ofstream upFile("updateData.csv"); // Update file
+	// Copy old file
+	string line;
+	while (myFile.good() && !myFile.eof()) {
+		// Get next line
+		if (myFile.good()) {
+			getline(myFile, line);
+		}
+		// If title in line, skip line
+		if (myFile.good() && line.find(title, 0) > line.length()) {
+			upFile << line;
+			upFile << "\n";
+		}
+	}
+	// Close files
+	myFile.close();
+	upFile.close();
+	// Remove old file
+	remove(fileName.c_str());
+	rename("updateData.csv", fileName.c_str());
+	// Refill Tree
+	tree->clearAll();
+	fillTree(tree);
 }
 
 #endif
