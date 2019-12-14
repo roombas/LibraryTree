@@ -210,7 +210,7 @@ void LibraryTree<T>::changeBookStatus(string title, int num)
 			{
 				string dL1 = "\",";
 				size_t dLPos1 = line.rfind(dL1, 0);
-				line = line.replace((dLPos1 + 2), 1, str);
+				line = line.replace((dLPos1 + 3), 2, str);
 
 				upFile << line;
 				myFile.close();
@@ -229,6 +229,7 @@ bool LibraryTree<T>::bookStatus(Lnode* node, string key)
 	{
 		if (node->data.getTitle() == key)
 		{
+			cout << "Is true\n";
 			return true;
 		}
 		else if (node->data.getTitle() < key)
