@@ -119,7 +119,67 @@ public:
 	void printTreeInOrder() const;
 	void insert(Lnode*&, Lnode*&);
 	void insertNode(T);
+	void specificInOrder(Lnode*, string);
+	void searchSpecific(string);
+	void allInOrder(Lnode*, string);
+	void searchAll(string);
 };
+
+//search function for specific book
+template <typename T>
+void LibraryTree<T>::searchSpecific(string key)
+{
+	specificInOrder(root, key);
+}
+
+//search function for all matching books
+template <typename T>
+void LibraryTree<T>::searchAll(string key)
+{
+	allInOrder(root, key);
+}
+
+//traverses tree and prints out the specified result
+template <typename T>
+void LibraryTree<T>::specificInOrder(Lnode* node, string key)
+{
+	if (node != nullptr)
+	{
+		string tmp = node->data.getTitle();
+		//finds first result of condition in tree
+		if (node->data.getTitle() == key || tmp.find(key) != string::npos)
+		{
+			cout << "Title: " << node->data.getTitle() << "\nAuthor: "
+				<< node->data.getAuthor() << "\nChecked In: "
+				<< node->data.getBookStatus() << "\n\n";
+			return;
+		}
+		else if (node->data.getTitle() < key)
+			specificInOrder(node->right, key);
+		else
+			specificInOrder(node->left, key);
+	}
+	else
+		cout << "Title not found\n";
+}
+
+//traverses full tree in-order to find and print all books with the specified key word
+template <typename T>
+void LibraryTree<T>::allInOrder(Lnode* node, string key)
+{
+	if (node != nullptr)
+	{
+		allInOrder(node->left, key);
+		string tmp = node->data.getTitle();
+		if (node->data.getTitle() == key || tmp.find(key) != string::npos)
+		{
+			cout << "Title: " << node->data.getTitle() << "\nAuthor: "
+				<< node->data.getAuthor() << "\nChecked In: "
+				<< node->data.getBookStatus() << "\n\n";
+		}
+		allInOrder(node->right, key);
+	}
+}
 
 template <class T>
 int LibraryTree<T>::getWidth()
@@ -182,6 +242,8 @@ int LibraryTree<T>::getDepth(Lnode* node)
 		else return(rDepth + 1);
 	}
 }
+
+//function to balance tree
 template <typename T>
 void LibraryTree<T>::balance(Lnode *& t)
 {
@@ -202,6 +264,8 @@ void LibraryTree<T>::balance(Lnode *& t)
 
 	t->height = max(height(t->left), height(t->right)) + 1;
 }
+
+//produces balance factor and height of each subtree
 template <typename T>
 void LibraryTree<T>::balanceCheck(Lnode *& t)
 {
@@ -302,6 +366,15 @@ void LibraryTree<T>::doubleWithRightChild(Lnode *& k1)
 	rotateWithLeftChild(k1->right);
 	rotateWithRightChild(k1);
 }
+//function that prints tree inorder
+template <typename T>
+void LibraryTree<T>::printTreeInOrder() const
+{
+	if (isEmpty())
+		cout << "Empty tree" << endl;
+	else
+		inOrder(root);
+}
 template <typename T>
 void LibraryTree<T>::inOrder(Lnode* t) const
 {
@@ -313,14 +386,7 @@ void LibraryTree<T>::inOrder(Lnode* t) const
 		inOrder(t->right);
 	}
 }
-template <typename T>
-void LibraryTree<T>::printTreeInOrder() const
-{
-	if (isEmpty())
-		cout << "Empty tree" << endl;
-	else
-		inOrder(root);
-}
+//insert class object Book
 template <typename T>
 void LibraryTree<T>::insertNode(T b)
 {
@@ -375,14 +441,11 @@ void fillTree(LibraryTree<Book>* tree)
 				for (size_t i = 3; i < dLPos - 2; ++i) {
 					word += line[i];
 				}
+				// Parse Title Key (first 3 letters)
+				key = word.substr(0,3);
 				title = word;
 				word = "";
-				// Parse Title Key (first 3 letters)
-				for (size_t i = 3; i < 6; ++i) {
-					word += line[i];
-				}
-				key = word;
-				word = "";
+
 				// Parse Author
 				for (size_t i = dLPos + 5; i < line.size() - 5; ++i) {
 					word += line[i];
