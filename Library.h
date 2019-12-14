@@ -132,6 +132,7 @@ public:
 	void allInOrder(Lnode*, string);
 	void searchAll(string);
 
+	bool bookStatus(Lnode*, string);
 	void changeBookStatus(string, int);
 };
 
@@ -190,48 +191,55 @@ void LibraryTree<T>::searchAll(string key)
 }
 
 template <typename T>
-void LibraryTree<T>::changeBookStatus(string key, int num)
+void LibraryTree<T>::changeBookStatus(string title, int num)
 {
-	Lnode* node = root;
+	if (bookStatus(root, title) == true)
+	{
+		string fileName = "Book1.csv";
+		ifstream myFile(fileName); // Data file
+		ofstream upFile("Book2.csv"); // Update file
+		string line;
+		size_t pos;
+		stringstream ss;
+		ss << num;
+		string str = ss.str();
+
+		while (getline(myFile, line))
+		{
+			if ((pos = line.find(title)) != string::npos)
+			{
+				string dL1 = "\",";
+				size_t dLPos1 = line.rfind(dL1, 0);
+				line = line.replace((dLPos1 + 2), 1, str);
+
+				upFile << line;
+				myFile.close();
+				upFile.close();
+				// Remove old file
+				remove(fileName.c_str());
+				rename("Book2.csv", fileName.c_str());
+			}
+		}
+	}
+}
+template <typename T>
+bool LibraryTree<T>::bookStatus(Lnode* node, string key)
+{
 	if (node != nullptr)
 	{
 		if (node->data.getTitle() == key)
-		{		
-			string fileName = "Book1.csv";
-			ifstream myFile(fileName); // Data file
-			ofstream upFile("Book2.csv"); // Update file
-			string line;
-			size_t pos;
-			stringstream ss;
-			ss << num;
-			string str = ss.str();
-
-			while (getline(myFile, line))
-			{
-				if ((pos = line.find(key)) != string::npos)
-				{
-					string dL1 = "\",";
-					size_t dLPos1 = line.rfind(dL1, 0);
-					line = line.replace((dLPos1 + 2), 1, str);
-
-					upFile << line;
-					myFile.close();
-					upFile.close();
-					// Remove old file
-					remove(fileName.c_str());
-					rename("Book2.csv", fileName.c_str());
-				}
-			}
+		{
+			return true;
 		}
 		else if (node->data.getTitle() < key)
-			specificInOrder(node->right, key);
+			bookStatus(node->right, key);
 		else
-			specificInOrder(node->left, key);
+			bookStatus(node->left, key);
 	}
 	else
 	{
 		cout << "Title not found\n";
-		return;
+		return false;
 	}
 }
 
