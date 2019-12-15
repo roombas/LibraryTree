@@ -18,11 +18,6 @@ private:
 
 public:
 	Book() {}
-	Book(string t, string a)
-	{
-		title = t;
-		author = a;
-	}
 	Book(string t, string a, int b)
 	{
 		title = t;
@@ -74,42 +69,70 @@ private:
 	Lnode* root;
 
 public:
+	//constructor
 	LibraryTree()
 	{
 		root = nullptr;
 	}
+	//deconstructor
 	~LibraryTree()
 	{
 		clearAll();
 	}
+
+	//class functions
 	bool isEmpty() const
 	{
 		return root == nullptr;
 	}
 	int height(Lnode* t) const
 	{
-		return t == nullptr ? -1 : t->height;
+		if (t == nullptr)
+			return -1;
+		else
+			return t->height;
 	}
+	Lnode * searchNodeHelper(Lnode * node, string key)
+	{
+		if (node != nullptr)
+		{
+			if (node->data.getTitle() == key)
+			{
+				return node;
+			}
+			else if (node->data.getTitle() < key)
+				return searchNodeHelper(node->right, key);
+			else
+				return searchNodeHelper(node->left, key);
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+
 	void balance(Lnode*&);
 	void rotateWithLeftChild(Lnode*&);
 	void rotateWithRightChild(Lnode*&);
 	void doubleWithLeftChild(Lnode*&);
 	void doubleWithRightChild(Lnode*&);
 
-	void insert(Lnode*&, Lnode*&);
-	void insertNode(T);
-
 	void makeEmpty(Lnode*&);
 	void clearAll();
 
-	bool search(string);
-	bool searchTool(Lnode*, string);
 	bool searchSpecific(string);
-	bool specificInOrder(Lnode*, string);
 	void searchAll(string);
-	void allInOrder(Lnode*, string);
-	void inOrder(Lnode*) const;
-	void printTreeInOrder() const;
+	void searchAllHelper(Lnode*, string);
+	void checkStatus(string);
+
+	void printHelper(Lnode*) const;
+	void printTree() const;
+	void printHelperA(Lnode*) const;
+	void printTreeA() const;
+
+	void insertHelper(Lnode*&, Lnode*&);
+	void insertNode(T);
+	void changeBookStatus(string, int);
 };
 
 template <typename T>
@@ -184,45 +207,19 @@ void LibraryTree<T>::doubleWithRightChild(Lnode*& k1)
 	rotateWithRightChild(k1);
 }
 
-template <typename T>
-bool LibraryTree<T>::search(string key)
-{
-	return searchTool(root, key);
-}
-//returns true if found title, rteurns false if no title
-template <typename T>
-bool LibraryTree<T>::searchTool(Lnode* node, string key)
-{
-	if (node != nullptr)
-	{
-		if (node->data.getTitle() == key)
-		{
-			return true;
-		}
-		else if (node->data.getTitle() < key)
-			searchTool(node->right, key);
-		else
-			searchTool(node->left, key);
-	}
-	else
-	{
-		cout << "Title not found.\n";
-		return false;
-	}
-}
 //search function for all matching books
 template <typename T>
 void LibraryTree<T>::searchAll(string key)
 {
-	allInOrder(root, key);
+	searchAllHelper(root, key);
 }
 //traverses full tree in-order to find and print all books with the specified key word
 template <typename T>
-void LibraryTree<T>::allInOrder(Lnode* node, string key)
+void LibraryTree<T>::searchAllHelper(Lnode* node, string key)
 {
 	if (node != nullptr)
 	{
-		allInOrder(node->left, key);
+		searchAllHelper(node->left, key);
 		string tmp = node->data.getTitle();
 		if (node->data.getTitle() == key || tmp.find(key) != string::npos)
 		{
@@ -230,19 +227,14 @@ void LibraryTree<T>::allInOrder(Lnode* node, string key)
 				<< node->data.getAuthor() << "\nChecked In: "
 				<< node->data.getBookStatus() << "\n\n";
 		}
-		allInOrder(node->right, key);
+		searchAllHelper(node->right, key);
 	}
-}
-//search function for specific book
-template <typename T>
-bool LibraryTree<T>::searchSpecific(string key)
-{
-	return specificInOrder(root, key);
 }
 //traverses tree and prints out the specified result
 template <typename T>
-bool LibraryTree<T>::specificInOrder(Lnode* node, string key)
+bool LibraryTree<T>::searchSpecific(string key)
 {
+	Lnode* node = searchNodeHelper(root, key);
 	if (node != nullptr)
 	{
 		string tmp = node->data.getTitle();
@@ -250,14 +242,10 @@ bool LibraryTree<T>::specificInOrder(Lnode* node, string key)
 		if (node->data.getTitle() == key || tmp.find(key) != string::npos)
 		{
 			cout << "Title: " << node->data.getTitle() << "\nAuthor: "
-				<< node->data.getAuthor() << "\nChecked In: "
-				<< node->data.getBookStatus() << "\n\n";
+			<< node->data.getAuthor() << "\nChecked In: "
+			<< node->data.getBookStatus() << "\n\n";
 			return true;
 		}
-		else if (node->data.getTitle() < key)
-			specificInOrder(node->right, key);
-		else
-			specificInOrder(node->left, key);
 	}
 	else
 	{
@@ -265,25 +253,42 @@ bool LibraryTree<T>::specificInOrder(Lnode* node, string key)
 		return false;
 	}
 }
-
-//function that prints tree inorder
+//checks if user input title is checked in or out
 template <typename T>
-void LibraryTree<T>::printTreeInOrder() const
+void LibraryTree<T>::checkStatus(string key)
+{
+	if (searchNodeHelper(root, key) != nullptr)
+	{
+		Lnode * node = searchNodeHelper(root, key);
+		int checkedIn = node->data.getBookStatus();
+		string title = node->data.getTitle();
+		if (checkedIn == 1)
+			cout << title << " is available\n";
+		else
+			cout << title << " is unavailable\n";
+	}
+	else
+		cout << "Title not found\n";
+}
+
+//function that prints tree inorder by title
+template <typename T>
+void LibraryTree<T>::printTree() const
 {
 	if (isEmpty())
 		cout << "Empty tree" << endl;
 	else
-		inOrder(root);
+		printHelper(root);
 }
 template <typename T>
-void LibraryTree<T>::inOrder(Lnode* t) const
+void LibraryTree<T>::printHelper(Lnode* t) const
 {
 	if (t != NULL)
 	{
-		inOrder(t->left);
+		printHelper(t->left);
 		cout << "Title: " << t->data.getTitle() << "\nAuthor: " << t->data.getAuthor()
 			<< "\nChecked In: " << t->data.getBookStatus() << "\n\n";
-		inOrder(t->right);
+		printHelper(t->right);
 	}
 }
 
@@ -295,22 +300,71 @@ void LibraryTree<T>::insertNode(T b)
 	node->data = b;
 	node->left = nullptr;
 	node->right = nullptr;
-	insert(root, node);
+	insertHelper(root, node);
 }
 template <typename T>
-void LibraryTree<T>::insert(Lnode*& nodePtr, Lnode*& node)
+void LibraryTree<T>::insertHelper(Lnode*& nodePtr, Lnode*& node)
 {
 	if (nodePtr == nullptr)
 		nodePtr = node;
 	else if (node->data.getTitle() < nodePtr->data.getTitle())
-		insert(nodePtr->left, node);
+		insertHelper(nodePtr->left, node);
 	else
-		insert(nodePtr->right, node);
+		insertHelper(nodePtr->right, node);
 
 	balance(nodePtr);
 }
 
+//change checked in/out. 1 = checked in, 0 = checked out
+void LibraryTree<Book>::changeBookStatus(string key, int num)
+{
+	Lnode * node = searchNodeHelper(root, key);
+	if (node != nullptr)
+	{
+		string fileName = "Book1.csv";
+		ifstream myFile(fileName); // Data file
+		ofstream upFile("Book2.csv"); // Update file
+		string line;
+		size_t pos;
+		stringstream ss;
+		ss << num;
+		string str = ss.str();
+
+		while (myFile.good() && !myFile.eof())
+		{
+			getline(myFile, line);
+			// Write the current line to the new file
+			if ((pos = line.find(key)) != string::npos)
+			{
+				string dL1 = "\",";
+				size_t dLPos1 = line.rfind(dL1);
+				line = line.replace((dLPos1 + 2), 1, str);
+				upFile << line;
+			}
+			if (myFile.good() && (pos = line.find(key)) == string::npos)
+			{
+				upFile << line;
+			}
+			// Add a line break to all but the last line
+			if (myFile.good()) {
+				upFile << "\n";
+			}
+		}
+		// Close files
+		myFile.close();
+		upFile.close();
+		//Remove old file
+		remove(fileName.c_str());
+		rename("Book2.csv", fileName.c_str());
+
+		node->data.setBookStatus(num);
+	}
+	else
+		cout << "Title not found.\n";
+}
+
 /***********************************/
+//fill tree via title
 void fillTree(LibraryTree<Book>* tree)
 {
 	string fileName = "Book1.csv";
@@ -377,52 +431,6 @@ void fillTree(LibraryTree<Book>* tree, string file) {
 	string fileName = file;
 	fillTree(tree);
 }
-//change book to checked in or out
-void changeBookStatus(LibraryTree<Book>* tree, string title, int num)
-{
-	if ((*tree).search(title))
-	{
-		string fileName = "Book1.csv";
-		ifstream myFile(fileName); // Data file
-		ofstream upFile("Book2.csv"); // Update file
-		string line;
-		size_t pos;
-
-		stringstream ss;
-		ss << num;
-		string str = ss.str();
-
-		while (myFile.good() && !myFile.eof())
-		{
-			getline(myFile, line);
-			// Write the current line to the new file
-			if ((pos = line.find(title)) != string::npos)
-			{
-				string dL1 = "\",";
-				size_t dLPos1 = line.rfind(dL1);
-				line = line.replace((dLPos1 + 2), 1, str);
-				upFile << line;
-			}
-			if (myFile.good() && (pos = line.find(title)) == string::npos)
-			{
-				upFile << line;
-			}
-			// Add a line break to all but the last line
-			if (myFile.good()) {
-				upFile << "\n";
-			}
-		}
-		// Close files
-		myFile.close();
-		upFile.close();
-		//Remove old file
-		remove(fileName.c_str());
-		rename("Book2.csv", fileName.c_str());
-		// Refill Tree
-		tree->clearAll();
-		fillTree(tree);
-	}
-}
 
 // Add Book entry to the data file
 void insertBook(LibraryTree<Book>* tree, string title, string author) {
@@ -457,7 +465,6 @@ void insertBook(LibraryTree<Book>* tree, string title, string author) {
 	book.setBookStatus(1);
 	(*tree).insertNode(book);
 }
-
 // Remove Book entry from the data file
 void removeBook(LibraryTree<Book>* tree, string title) {
 	string fileName = "Book1.csv";
