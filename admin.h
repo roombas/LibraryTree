@@ -3,11 +3,13 @@
 
 #include <iostream>
 #include <string>
+#include "Library.h"
 
 using namespace std;
+LibraryTree<Book> tree;
 
-int addbook();
-int deletebook();
+void addbook(LibraryTree<Book>*);
+void deletebook(LibraryTree<Book>*);
 
 class Admin
 {
@@ -20,8 +22,9 @@ public:
 
 };
 
-int setAdmin(){
+void setAdmin(){
     Admin Admin1;
+	fillTree(&tree, "LibraryDataTest.csv");
 
     string user, paswd;
     cout << "Username: ";
@@ -40,10 +43,10 @@ int setAdmin(){
         switch (value)
         {
         case 1:
-            addbook();
+            addbook(&tree);
             break;
         case 2:
-            deletebook();
+            deletebook(&tree);
             break;
        /* case 3:
             main();
@@ -57,14 +60,59 @@ int setAdmin(){
     }
 }
 
-int addbook(){
-    //increment the book from previous number..
-    //add title
-    //author
-    //nodes should be involved and .txt
+void addbook(LibraryTree<Book>* tree) {
+	cout << "Adding New Book Entry.";
+	cin.ignore();
+	bool loop = true;
+	while (loop) {
+		//add title
+		string title;
+		cout << "\nInsert Title:\t";
+		getline(cin, title);
+		//author
+		string author;
+		cout << "Insert Author:\t";
+		getline(cin, author);
+		// verify
+		// TODO: check if title is already in data
+		cout << "\nIs this correct? [y/n]: ";
+		string ans;
+		getline(cin, ans);
+		if (!ans.compare("y") || !ans.compare("Y")) {
+			insertBook(tree, title, author);
+			cout << "New Book Added.\n";
+			loop = false;
+		}
+		else if (ans.compare("n") || ans.compare("N")) {
+			cout << "New Entry Cancelled.\n";
+			loop = false;
+		}
+	}
 }
 
-int deletebook(){
-    //book title from .txt
+void deletebook(LibraryTree<Book>* tree){
+	cout << "Deleting Book Entry.";
+	cin.ignore();
+	bool loop = true;
+	while (loop) {
+		//add title
+		string title;
+		cout << "\nInsert Title:\t";
+		getline(cin, title);
+		// verify
+		// TODO: check if title exists in data
+		cout << "\nIs this correct? [y/n]: ";
+		string ans;
+		getline(cin, ans);
+		if (!ans.compare("y") || !ans.compare("Y")) {
+			removeBook(tree, title);
+			cout << "Book Deleted.\n";
+			loop = false;
+		}
+		else if (ans.compare("n") || ans.compare("N")) {
+			cout << "Deletion Cancelled.\n";
+			loop = false;
+		}
+	}
 }
 #endif
