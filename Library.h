@@ -9,6 +9,23 @@
 #include <sstream>
 using namespace std;
 
+/***************************LIBRARYTREE PUBLIC CLASS OPERATIONS********************************
+	bool searchSpecific(title)				--> Searches for title using partial or full title.
+												Must begin with start of title
+												(Ex: Harry Potter, NOT arry Potter)
+	void searchAll(title)					--> Searches for all instances of a key word.
+												Must begin with start of title
+	void checkStatus(title)					--> Check status of book in database
+	void clearAll();						--> Clears tree
+	void printTree() const;					--> Prints tree inorder (by title)
+	void printTreeA() const;				--> Prints tree inorder (by author)
+	void changeBookStatus(title, int)		--> Changes book status of file and tree (0 or 1)
+/*********************************PUBLIC OPERATIONS********************************************
+	void insertBook(&tree, title, author)	--> Adds a new book to .csv file
+	void removeBook(&tree, title)			--> Removes book from .csv file
+	void fillTree(&tree, filename)			--> Fills initial tree with books from file
+/**********************************************************************************************/
+
 class Book
 {
 private:
@@ -26,7 +43,7 @@ public:
 	}
 	string getTitle()
 	{
-		return title;
+	return title;
 	}
 	string getAuthor()
 	{
@@ -363,7 +380,7 @@ void LibraryTree<Book>::changeBookStatus(string key, int num)
 		cout << "Title not found.\n";
 }
 
-/***********************************/
+/*****************NON-CLASS FUNCTIONS******************/
 //fill tree via title
 void fillTree(LibraryTree<Book>* tree)
 {
@@ -431,7 +448,6 @@ void fillTree(LibraryTree<Book>* tree, string file) {
 	string fileName = file;
 	fillTree(tree);
 }
-
 // Add Book entry to the data file
 void insertBook(LibraryTree<Book>* tree, string title, string author) {
 	string fileName = "Book1.csv";
@@ -467,6 +483,7 @@ void insertBook(LibraryTree<Book>* tree, string title, string author) {
 }
 // Remove Book entry from the data file
 void removeBook(LibraryTree<Book>* tree, string title) {
+
 	string fileName = "Book1.csv";
 	ifstream myFile(fileName); // Data file
 	ofstream upFile("Book2.csv"); // Update file
