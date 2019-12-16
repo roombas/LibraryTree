@@ -1,6 +1,12 @@
 #ifndef Extra_H
 #define Extra_H
 
+#include <cstdlib>
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <fstream>
+#include <sstream>
 #include "Library.h"
 using namespace std;
 
@@ -92,4 +98,5 @@ void fillTreeA(LibraryTree<Book>* tree, string file) {
 	string fileName = file;
 	fillTreeA(tree);
 }
+
 #endif

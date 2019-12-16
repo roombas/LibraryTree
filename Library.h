@@ -9,24 +9,22 @@
 #include <sstream>
 using namespace std;
 
-/***************************LIBRARYTREE PUBLIC CLASS OPERATIONS********************************************
-	bool searchSpecific(title)			--> Searches for title using partial or full title.
-							Must begin with start of title
-							(Ex: Harry Potter, NOT arry Potter)
-	void searchAll(title)				--> Searches for all instances of a key word.
-							Must begin with start of title
-	void checkStatus(title)				--> Check status of book in database
-	void clearAll();				--> Clears tree
-	void printTree() const;				--> Prints tree inorder (by title)
-	void printTreeA() const;			--> Prints tree inorder (by author)
+/***************************LIBRARYTREE PUBLIC CLASS OPERATIONS********************************
+	bool searchSpecific(title)				--> Searches for title using partial or full title.
+												Must begin with start of title
+												(Ex: Harry Potter, NOT arry Potter)
+	void searchAll(title)					--> Searches for all instances of a key word.
+												Must begin with start of title
+	void checkStatus(title)					--> Check status of book in database
+	void clearAll();						--> Clears tree
+	void printTree() const;					--> Prints tree inorder (by title)
+	void printTreeA() const;				--> Prints tree inorder (by author)
 	void changeBookStatus(title, int)		--> Changes book status of file and tree (0 or 1)
-/*********************************PUBLIC OPERATIONS********************************************************
-	void insertBook(&tree, title, author)		--> Adds a new book to .csv file
+/*********************************PUBLIC OPERATIONS********************************************
+	void insertBook(&tree, title, author)	--> Adds a new book to .csv file
 	void removeBook(&tree, title)			--> Removes book from .csv file
 	void fillTree(&tree, filename)			--> Fills initial tree with books from file
-/**********************************************************************************************************/
-
-
+/**********************************************************************************************/
 
 class Book
 {
@@ -73,7 +71,7 @@ public:
 template <typename T>
 class LibraryTree
 {
-private:
+public:
 	static const int ALLOWED_IMBALANCE = 1; //for balancing tree
 	struct Lnode
 	{
@@ -111,11 +109,11 @@ public:
 		else
 			return t->height;
 	}
-	Lnode * searchNodeHelper(Lnode * node, string key)
+	Lnode * searchNodeHelper(Lnode *& node, string key)
 	{
 		if (node != nullptr)
 		{
-			if (node->data.getTitle() == key)
+			if (node->data.getTitle() == key || (node->data.getTitle()).find(key) != string::npos)
 			{
 				return node;
 			}
@@ -141,8 +139,8 @@ public:
 
 	bool searchSpecific(string);
 	void searchAll(string);
-	void searchAllHelper(Lnode*, string);
-	void checkStatus(string);
+	void searchAllHelper(Lnode*&, string);
+	bool checkStatus(string);
 
 	void printHelper(Lnode*) const;
 	void printTree() const;
@@ -234,7 +232,7 @@ void LibraryTree<T>::searchAll(string key)
 }
 //traverses full tree in-order to find and print all books with the specified key word
 template <typename T>
-void LibraryTree<T>::searchAllHelper(Lnode* node, string key)
+void LibraryTree<T>::searchAllHelper(Lnode*& node, string key)
 {
 	if (node != nullptr)
 	{
@@ -256,13 +254,15 @@ bool LibraryTree<T>::searchSpecific(string key)
 	Lnode* node = searchNodeHelper(root, key);
 	if (node != nullptr)
 	{
-		string tmp = node->data.getTitle();
+		string title = node->data.getTitle();
+		string author = node->data.getAuthor();
+		int check = node->data.getBookStatus();
 		//finds first result of condition in tree
-		if (node->data.getTitle() == key || tmp.find(key) != string::npos)
+		if (title == key || title.find(key) != string::npos) 
 		{
-			cout << "Title: " << node->data.getTitle() << "\nAuthor: "
-			<< node->data.getAuthor() << "\nChecked In: "
-			<< node->data.getBookStatus() << "\n\n";
+			cout << "Title: " << title << "\nAuthor: "
+			<< author << "\nChecked In: "
+			<< check << "\n";
 			return true;
 		}
 	}
@@ -274,7 +274,7 @@ bool LibraryTree<T>::searchSpecific(string key)
 }
 //checks if user input title is checked in or out
 template <typename T>
-void LibraryTree<T>::checkStatus(string key)
+bool LibraryTree<T>::checkStatus(string key)
 {
 	if (searchNodeHelper(root, key) != nullptr)
 	{
@@ -282,12 +282,16 @@ void LibraryTree<T>::checkStatus(string key)
 		int checkedIn = node->data.getBookStatus();
 		string title = node->data.getTitle();
 		if (checkedIn == 1)
-			cout << title << " is available\n";
+			cout << "[ " << title << " ]" << " is available\n";
 		else
-			cout << title << " is unavailable\n";
+			cout << "[ " << title << " ]" << " is unavailable\n";
+		return true;
 	}
 	else
+	{
 		cout << "Title not found\n";
+		return false;
+	}
 }
 
 //function that prints tree inorder by title
