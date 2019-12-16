@@ -1,5 +1,5 @@
-# Library.h
-The purpose of this library is to interact with and manipulate Library data stored in a separate file.
+# Library
+The purpose of this program is to interact with and manipulate Library data stored in a separate file.
 Guest users are able to search for books by their title or author.
 Library admin have the ability to add or remove books from the database, as well as checkin/checkout the books from inventory.
 
