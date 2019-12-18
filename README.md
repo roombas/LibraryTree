@@ -5,6 +5,7 @@ Library admin have the ability to add or remove books from the database, as well
 
 ## Usage
 Run the executable while in the same folder as the library data file.
+If using compiler: must have Admin.h, Library.h, Library.cpp, and library data file in same folder to run.
 
 ## Contributors
 Stephanie Lu, Micah McClain, and Alejandro Barragan</br>
