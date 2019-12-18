@@ -1,0 +1,19 @@
+Individual Contribution
+
+Stephanie Lu:
+Research and compilation
+Library.h functions
+User interface
+Group management
+
+Micah McClain:
+Library.h functions
+User interface
+Performance
+QA/Debugging
+
+Alejandro Barragan
+Research
+Admin.h
+User interface
+Debugging
