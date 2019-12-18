@@ -1,0 +1,35 @@
+Group:
+Stephanie Lu
+Micah McClain
+Alejandro Barragan
+
+INTRODUCTION
+Repository:
+https://github.com/roombas/LibraryTree
+
+Description: 
+The purpose of this program is to interact with and manipulate Library data stored 
+in a separate file. Guest users are able to search for books by their title or author. 
+Library admin have the ability to add or remove books from the database, 
+as well as checkin/checkout the books from inventory.
+
+Language:
+C++
+
+Data Structures Used:
+- Vectors
+- AVL trees
+
+MEASUREMENT
+- self balancing BST performance
+- Using time function, printed out ms needed to complete tasks
+
+ANALYSIS
+- Results reveal search functions are quite efficient (low as 1 ms)
+- Printing out whole tree takes time (~300 ms).
+- Reading from file uses arrays, takes time
+
+CONCLUSION
+- able to place objects into trees with multiple variables
+- organizes alphabetically without need to change titles
+- tree efficient for search function
