@@ -12,7 +12,7 @@ User interface
 Performance
 QA/Debugging
 
-Alejandro Barragan
+Alejandro Barragan:
 Research
 Admin.h
 User interface
