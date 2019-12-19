@@ -13,18 +13,19 @@
 
 #include <iostream>
 #include <string>
+#include <time.h>
 #include "Library.h"
 #include "Admin.h"
-#include <time.h>
 
+string fileName = "LibraryData.csv"; // File name for Library Data
 LibraryTree<Book> tree; //title sorted tree
 LibraryTree<Book> treeA; //author sorted tree
-string fileName; // File name for Library Data
 clock_t timeStart; // Used for timing functions
 
 void run(string); // Startup code
 void init(); // Load/Reload data trees
 void uninit(); // Unload data trees
+void updateData(); // Updates the data in the file, then reloads the trees
 void homePage(); // The home page - user options
 void searchPage(); // The search page - user search options
 void adminPage(); // The admin page - file manipulation options
@@ -32,16 +33,13 @@ void searchBooks(LibraryTree<Book>*, int); // Searches for specified title in th
 void adminCheckin(LibraryTree<Book>*); // Check in/out a book
 void addBook(LibraryTree<Book>*); // Add a book to Data
 void delBook(LibraryTree<Book>*); // Delete a book from Data
-void loadBookData(LibraryTree<Book>*, bool); // Fill tree sorted by Title or Author (toggleable)
-void updateDataFile(LibraryTree<Book>*); // Updates data csv file
 void timerStart(); // Start timer
-double timerStop(); // Stop timer
+int timerStop(); // Stop timer and return the change in time in nanoseconds
 
 /******************************MAIN FUNCTION***********************************/
 int main()
 {
 	run("LibraryData.csv");
-
 	return 0;
 }
 /******************************************************************************/
@@ -56,14 +54,21 @@ void run(string file) {
 
 // Load/Reload data trees
 void init() {
-	loadBookData(&tree, 0); // Tree sorted by Title (default)
-	loadBookData(&treeA, 1); // Tree sorted by Author (search use only)
+	tree.clearAll();
+	treeA.clearAll();
+	tree.loadFromCSV(fileName, 0); // Sorted by Title
+	treeA.loadFromCSV(fileName, 1); // Sorted by Author
 }
 
 // Unload data trees
 void uninit() {
 	tree.~LibraryTree();
 	treeA.~LibraryTree();
+}
+
+// Updates the data in the file, then reloads the trees
+void updateData() {
+	if(tree.saveToCSV(fileName)) init();// Save current tree to file and reinitialize
 }
 
 //main function that will hold all other user functions
@@ -90,6 +95,8 @@ void homePage() {
 			break;
 		case 3: // Exit
 			uninit();
+			system("CLS");
+			cout << "You have exited the program.\n\nGoodbye.\n\n";
 			break;
 		default:
 			cin.clear();
@@ -244,14 +251,25 @@ void adminCheckin(LibraryTree<Book>* lib) {
 			lib->printBook(title);
 			cout << "**************************************\n";
 			cout << "Time taken = " << timerStop() << " ms\n\n";
-			cout << "1 = In Stock\t0 = Out of Stock\n\nSet Book Status: ";
+			cout << "1 = In Stock\t0 = Out of Stock\nSet Book Status: ";
 			cin >> num;
-			if (num == 0 || num == 1) lib->changeStatus(title, num);
+			timerStart();
+			if (num == 0 || num == 1) {
+				lib->changeStatus(title, num);
+				// Update file to reflect changes in tree
+				updateData();
+				cout << "\nBook is now: ";
+				(num) ? cout << "In Stock." : cout << "Out of Stock.";
+			}
+			else {
+				cout << "Invalid status selected.";
+			}
+			cout << " Time taken = " << timerStop() << " ms\n";
 		}
 		else {
 			cout << "No entry found.\n";
 			cout << "**************************************\n";
-			cout << "Time taken = " << timerStop() << " ms\n\n";
+			cout << "Time taken = " << timerStop() << " ms\n";
 		}
 		cout << "\nNew Search? [y/n]\n";
 		while (!(cin >> cont))
@@ -265,10 +283,6 @@ void adminCheckin(LibraryTree<Book>* lib) {
 		else if (cont == 'n' || cont == 'N')
 			running = false;
 	}
-	// Update changes
-	updateDataFile(lib);
-	uninit();
-	init();
 }
 
 // Adds book to database
@@ -297,7 +311,9 @@ void addBook(LibraryTree<Book>* lib) {
 			book.setAuthor(author);
 			book.setBookStatus(1);
 			(*lib).insertNode(book);
-			cout << "\nNew Book Added.\n";
+			// Update file to reflect changes in tree
+			updateData();
+			cout << "\nNew Book Added. ";
 			cout << "Time taken = " << timerStop() << " ms\n\n";
 		}
 		else if (ans.compare("n") || ans.compare("N")) {
@@ -316,10 +332,6 @@ void addBook(LibraryTree<Book>* lib) {
 		else if (cont == 'n' || cont == 'N')
 			loop = false;
 	}
-	// Update changes
-	updateDataFile(lib);
-	uninit();
-	init();
 }
 
 // Deletes book from database
@@ -344,8 +356,12 @@ void delBook(LibraryTree<Book>* lib) {
 			string ans;
 			getline(cin, ans);
 			if (!ans.compare("y") || !ans.compare("Y")) {
+				timerStart();
 				lib->removeNode(title);
-				cout << "Book Deleted.\n";
+				// Update file to reflect changes in tree
+				updateData();
+				cout << "Book Deleted. ";
+				cout << "Time taken = " << timerStop() << " ms\n";
 				loop = false;
 			}
 			else if (ans.compare("n") || ans.compare("N")) {
@@ -371,99 +387,6 @@ void delBook(LibraryTree<Book>* lib) {
 		else if (cont == 'n' || cont == 'N')
 			loop = false;
 	}
-	// Update changes
-	updateDataFile(lib);
-	uninit();
-	init();
-}
-
-// Fill tree sorted by Title or Author (toggleable)
-void loadBookData(LibraryTree<Book>* lib, bool toggle)
-{
-	ifstream myFile;
-	Book book;
-	string title;
-	string author;
-	int checkedIn;
-	string line;
-	string word = "";
-	int num = -1;
-	string dL = "\",\"";
-	string dL1 = "\",";
-
-	myFile.open(fileName);
-	getline(myFile, line); // Skip header line
-
-	if (!myFile.good())
-	{
-		cout << "Invalid file\n";
-	}
-	else {
-		getline(myFile, line); // Get 1st line of data
-		while (myFile.good() && !myFile.eof())
-		{
-			size_t dLPos = line.find(dL, 0);
-			// Parse Title
-			for (size_t i = 3; i < dLPos - 2; ++i) {
-				word += line[i];
-			}
-			title = word;
-			word = "";
-
-			// Parse Author
-			for (size_t i = dLPos + 5; i < line.size() - 5; ++i) {
-				word += line[i];
-			}
-			author = word;
-			word = "";
-
-			size_t dLPos1 = line.rfind(dL1, 0);
-			// Parse Checked in or out
-			for (size_t i = dLPos1 + 4; i < line.size(); ++i) {
-				word = line[i];
-			}
-			istringstream iss(word);
-			iss >> num;
-			checkedIn = num;
-			word = "";
-			num = -1;
-
-			if (!toggle) {
-				book.setTitle(title);
-				book.setAuthor(author);
-			}
-			else {
-				book.setTitle(author); // Swap author
-				book.setAuthor(title); // and title!
-			}
-			book.setBookStatus(checkedIn);
-			(*lib).insertNode(book);
-			if (myFile.good()) {
-				getline(myFile, line); // Get next line of data
-			}
-		}
-	}
-	myFile.close();
-}
-
-// Updates the data csv file
-void updateDataFile(LibraryTree<Book>* lib) {
-	vector<string> title = lib->getTitles();
-	vector<string> author = lib->getAuthors();
-	vector<int> status = lib->getStatuses();
-	int size = title.size();
-	ofstream upFile("lib_update.csv"); // New file for update file
-	// Print column headers in new file
-	upFile << "Title, Author, Checked In\n";
-	// Copy contents of lib to new file
-	for (int i = 0; i < size; ++i) {
-		upFile << "\"\"\"" + title.at(i) + "\"\"\",\"\"\"" + author.at(i) + "\"\"\"," << status.at(i) << "\n";
-	}
-	// Cleanup
-	upFile.close();
-	// Remove old file
-	remove(fileName.c_str());
-	rename("lib_update.csv", fileName.c_str());
 }
 
 // Start the Timer
@@ -471,7 +394,7 @@ void timerStart() {
 	timeStart = clock();
 }
 
-// Stop the Timer
-double timerStop() {
+// Stop the Timer and return the difference
+int timerStop() {
 	return ((int)clock() - (int)timeStart);
 }
