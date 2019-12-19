@@ -25,12 +25,6 @@
 using namespace std;
 
 /***************************LIBRARYTREE PUBLIC CLASS OPERATIONS********************************
-	vector<string> getTitles()				--> Returns a vector containing all Book Titles
-												sorted by Title.
-	vector<string> getAuthors()				--> Returns a vector containing all Book Authors
-												sorted by Title.
-	vector<int> getStatuses()				--> Returns a vector containing all Book Statuses
-												sorted by Title.
 	bool isEmpty()							-->	Returns True if the tree is empty.
 	void changeStatus(string, int)			--> Changes book status of file and tree (0 or 1)
 	void printTree(bool)					--> Prints tree inorder. Can toggle between Title
@@ -40,6 +34,9 @@ using namespace std;
 	void searchAll(string, bool)			--> Searches for all instances of a substring.
 												Can toggle between Title and Author search.
 	void clearAll()							--> Clears tree.
+	bool saveToCSV()						--> Saves tree data to a specified CSV file and
+												returns True if successful.
+	void loadFromCSV()						--> Loads tree data from a specified CSV file.
 /**********************************************************************************************/
 
 class Book
@@ -94,27 +91,6 @@ public:
 	// Deconstructor
 	~LibraryTree() {
 		clearAll();
-	}
-
-	// Return a vector containing all titles
-	vector<string> getTitles() {
-		titles.clear();
-		getTitles(root);
-		return titles;
-	}
-
-	// Return a vector containing all authors
-	vector<string> getAuthors() {
-		authors.clear();
-		getAuthors(root);
-		return authors;
-	}
-
-	// Return a vector containing all statuses
-	vector<int> getStatuses() {
-		statuses.clear();
-		getStatuses(root);
-		return statuses;
 	}
 
 	//class functions
@@ -179,7 +155,78 @@ public:
 
 	//clears out tree and memory
 	void clearAll() {
-		clearAll(root);
+		clearAll(root); // Empty all nodes
+	}
+
+	// Updates the data csv file
+	bool saveToCSV(string fileName) {
+		// Temporary file for update
+		ofstream upFile("lib_update.csv");
+		// Print column headers in new file
+		upFile << "Title, Author, Checked In\n";
+		// Fill current data
+		fillUpdateFile(root, upFile);
+		// Cleanup
+		upFile.close();
+		// Remove old file
+		remove(fileName.c_str());
+		return rename("lib_update.csv", fileName.c_str());
+	}
+
+	// Fill tree sorted by Title or Author (toggleable)
+	void loadFromCSV(string loadFile, bool toggle)
+	{
+		ifstream myFile;
+		Book book;
+		string line;
+		string word = "";
+		int num = -1;
+		// Delimiters
+		string dL = "\",\"";
+		string dL1 = "\",";
+		// Open file
+		myFile.open(loadFile);
+		getline(myFile, line); // Skip header line
+
+		if (!myFile.good())
+		{
+			cout << "Invalid file\n";
+		}
+		else {
+			getline(myFile, line); // Get 1st line of data
+			while (myFile.good() && !myFile.eof())
+			{
+				size_t dLPos = line.find(dL, 0);
+				// Parse Title if toggle = 1, Author if toggle = 0
+				for (size_t i = 3; i < dLPos - 2; ++i) {
+					word += line[i];
+				}
+				(toggle) ? book.setAuthor(word) : book.setTitle(word);
+				word = "";
+				// Parse Author if toggle = 1, Author if toggle = 0
+				for (size_t i = dLPos + 5; i < line.size() - 5; ++i) {
+					word += line[i];
+				}
+				(toggle) ? book.setTitle(word) : book.setAuthor(word);
+				word = "";
+				size_t dLPos1 = line.rfind(dL1, 0);
+				// Parse Checked in or out (integer)
+				for (size_t i = dLPos1 + 4; i < line.size(); ++i) {
+					word = line[i];
+				}
+				istringstream iss(word);
+				iss >> num;
+				book.setBookStatus(num);
+				word = "";
+				num = -1;
+				// Insert new book into tree
+				insertNode(book);
+				if (myFile.good()) {
+					getline(myFile, line); // Get next line of data if next line exists
+				}
+			}
+		}
+		myFile.close();
 	}
 
 	bool sAFlag = false; // Prevents searchAll from returning repeatedly
@@ -199,32 +246,7 @@ private:
 	};
 	// Class variables
 	Lnode* root;
-
-	// Get vectors containing all the data
-	vector<string> titles;	// Holds all titles
-	vector<string> authors;	// Holds all authors
-	vector<int> statuses;	// Holds all book status
-	void getTitles(Lnode*& node) {
-		if (node != NULL) {
-			getTitles(node->left);
-			titles.push_back(node->data.getTitle());
-			getTitles(node->right);
-		}
-	}
-	void getAuthors(Lnode*& node) {
-		if (node != NULL) {
-			getAuthors(node->left);
-			authors.push_back(node->data.getAuthor());
-			getAuthors(node->right);
-		}
-	}
-	void getStatuses(Lnode*& node) {
-		if (node != NULL) {
-			getStatuses(node->left);
-			statuses.push_back(node->data.getBookStatus());
-			getStatuses(node->right);
-		}
-	}
+	string fileName = "";
 
 	// Finds height of the tree
 	int height(Lnode* t) const
@@ -445,6 +467,18 @@ private:
 	{
 		rotateWithLeftChild(k1->right);
 		rotateWithRightChild(k1);
+	}
+
+	// Fills the update file with data
+	void fillUpdateFile(Lnode* node, ofstream& upFile) {
+		if (node != NULL)
+		{
+			fillUpdateFile(node->left, upFile);
+			upFile << "\"\"\"" + node->data.getTitle()
+				+ "\"\"\",\"\"\"" + node->data.getAuthor()
+				+ "\"\"\"," << node->data.getBookStatus() << "\n";
+			fillUpdateFile(node->right, upFile);
+		}
 	}
 };
 
