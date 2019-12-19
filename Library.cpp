@@ -95,8 +95,6 @@ void homePage() {
 			break;
 		case 3: // Exit
 			uninit();
-			system("CLS");
-			cout << "You have exited the program.\n\nGoodbye.\n\n";
 			break;
 		default:
 			cin.clear();
